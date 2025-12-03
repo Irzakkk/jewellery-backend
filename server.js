@@ -32,8 +32,6 @@ app.use("/api/gold", goldRoutes);
 const silverRoutes = require("./src/routes/silverRates");
 app.use("/api/silver", silverRoutes);
 
-const tickerRoutes = require("./src/routes/ticker");
-app.use("/api/ticker", tickerRoutes);
 
 const popupRoutes = require("./src/routes/popup");
 app.use("/api/popup", popupRoutes);
