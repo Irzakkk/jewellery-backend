@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+<<<<<<< HEAD
 
 router.get("/", (req, res) => {
   res.json({
@@ -11,5 +12,10 @@ router.get("/", (req, res) => {
     ]
   });
 });
+=======
+const { getTicker } = require("../controllers/tickerController");
+
+router.get("/", getTicker);
+>>>>>>> 74fd3b458da801509adbd6327921070077fb45d4
 
 module.exports = router;

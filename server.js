@@ -32,8 +32,6 @@ app.use("/api/gold", goldRoutes);
 const silverRoutes = require("./src/routes/silverRates");
 app.use("/api/silver", silverRoutes);
 
-const tickerRoutes = require("./src/routes/ticker");
-app.use("/api/ticker", tickerRoutes);
 
 const popupRoutes = require("./src/routes/popup");
 app.use("/api/popup", popupRoutes);
@@ -53,12 +51,20 @@ app.use("/api/notifications", notificationRoutes);
 const clickRoutes = require("./src/routes/clickLogs");
 app.use("/api/clicks", clickRoutes);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 74fd3b458da801509adbd6327921070077fb45d4
 const mmtcRoutes = require("./src/routes/mmtc");
 app.use("/api/mmtc", mmtcRoutes);
 
 
 const tickerRoutes = require("./src/routes/ticker");
+<<<<<<< HEAD
 app.use("/api/ticker-bar", tickerRoutes);
+=======
+app.use("/api/ticker", tickerRoutes);
+>>>>>>> 74fd3b458da801509adbd6327921070077fb45d4
 
 const unlimitedLiveRoutes = require("./src/routes/unlimitedLive");
 app.use("/api/live", unlimitedLiveRoutes);
