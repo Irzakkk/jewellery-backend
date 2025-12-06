@@ -1,16 +1,14 @@
-const pool = require("../config/db");
-
-exports.getTicker = async (req, res) => {
+ exports.getTicker = async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT message FROM ticker_messages ORDER BY id DESC LIMIT 10"
-    );
-
-    const tickerList = result.rows.map(row => row.message);
-
-    res.json({ ticker: tickerList });
-  } catch (err) {
-    console.error("Ticker Fetch Error:", err);
-    res.status(500).json({ error: "Server error" });
+    res.json({
+      ticker: [
+        { label: "GOLD 24K", value: "₹6120", direction: "up" },
+        { label: "SILVER", value: "₹76", direction: "down" },
+        { label: "USD-INR", value: "83.10", direction: "up" },
+        { label: "GOLD FUTURE", value: "130655", direction: "down" }
+      ]
+    });
+  } catch {
+    res.status(500).json({ error: "Server Error" });
   }
 };
