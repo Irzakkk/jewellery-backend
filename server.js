@@ -52,3 +52,13 @@ app.use("/api/notifications", notificationRoutes);
 
 const clickRoutes = require("./src/routes/clickLogs");
 app.use("/api/clicks", clickRoutes);
+
+const mmtcRoutes = require("./src/routes/mmtc");
+app.use("/api/mmtc", mmtcRoutes);
+
+
+const tickerRoutes = require("./src/routes/ticker");
+app.use("/api/ticker-bar", tickerRoutes);
+
+const unlimitedLiveRoutes = require("./src/routes/unlimitedLive");
+app.use("/api/live", unlimitedLiveRoutes);
