@@ -1,37 +1,34 @@
 require("dotenv").config();
 
-
 const express = require("express");
 const cors = require("cors");
 const db = require("./src/config/db");
 
 console.log("Loaded ENV Host:", process.env.DB_HOST);
 
-require("dotenv").config();
-
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// test route
+// Root Test Route
 app.get("/", (req, res) => {
     res.send("Jewellery Live Rate Backend Running...");
 });
 
-// start server
+// PORT SETUP
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
-    
     console.log(`Server running on port ${PORT}`);
 });
-// Adding Routes
+
+/* ---------------- ROUTES ---------------- */
+
 const goldRoutes = require("./src/routes/goldRates");
 app.use("/api/gold", goldRoutes);
 
 const silverRoutes = require("./src/routes/silverRates");
 app.use("/api/silver", silverRoutes);
-
 
 const popupRoutes = require("./src/routes/popup");
 app.use("/api/popup", popupRoutes);
@@ -51,20 +48,14 @@ app.use("/api/notifications", notificationRoutes);
 const clickRoutes = require("./src/routes/clickLogs");
 app.use("/api/clicks", clickRoutes);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 74fd3b458da801509adbd6327921070077fb45d4
 const mmtcRoutes = require("./src/routes/mmtc");
 app.use("/api/mmtc", mmtcRoutes);
 
-
+// Keep only one — final correct route:
 const tickerRoutes = require("./src/routes/ticker");
-<<<<<<< HEAD
-app.use("/api/ticker-bar", tickerRoutes);
-=======
 app.use("/api/ticker", tickerRoutes);
->>>>>>> 74fd3b458da801509adbd6327921070077fb45d4
 
+// 🆕 Unlimited Live Rates Endpoint
 const unlimitedLiveRoutes = require("./src/routes/unlimitedLive");
 app.use("/api/live", unlimitedLiveRoutes);
+
