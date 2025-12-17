@@ -1,57 +1,66 @@
-// src/controllers/unlimitedLiveController.js
 const axios = require("axios");
-const cheerio = require("cheerio");
 
-exports.getUnlimitedLive = async (req, res) => {
+const TROY_OUNCE = 31.1034768;
+
+const PREMIUM_GOLD_PER_GRAM = Number(process.env.PREMIUM_GOLD_PER_GRAM || 100);
+const PREMIUM_SILVER_PER_GRAM = Number(process.env.PREMIUM_SILVER_PER_GRAM || 2);
+const MAKING_CHARGE_PER_GRAM = Number(process.env.MAKING_CHARGE_PER_GRAM || 0);
+
+exports.getLiveRates = async (req, res) => {
   try {
-    // GOLD API (unlimited free)
-    const goldApi = await axios.get("https://api.gold-api.com/price/XAU");
-    const silverApi = await axios.get("https://api.gold-api.com/price/XAG");
+    // 1️⃣ Fetch gold & silver spot
+    const [goldRes, silverRes, fxRes] = await Promise.all([
+      axios.get("https://api.gold-api.com/price/XAU"),
+      axios.get("https://api.gold-api.com/price/XAG"),
+      axios.get("https://api.frankfurter.dev/v1/latest?base=USD"),
+    ]);
 
-    const usdInr = 89.95; // Replace later with FX API
+    const goldUsdPerOz = goldRes.data.price;
+    const silverUsdPerOz = silverRes.data.price;
+    const usdInr = fxRes.data.rates.INR;
 
-    const goldUsd = goldApi.data.price;
-    const silverUsd = silverApi.data.price;
+    // 2️⃣ Convert to INR per gram
+    const goldPerGramRaw = (goldUsdPerOz * usdInr) / TROY_OUNCE;
+    const silverPerGramRaw = (silverUsdPerOz * usdInr) / TROY_OUNCE;
 
-    const gram = 31.1035;
+    // 3️⃣ Apply premium logic (MCX-style)
+    const gold24 = Math.round(goldPerGramRaw + PREMIUM_GOLD_PER_GRAM + MAKING_CHARGE_PER_GRAM);
+    const gold22 = Math.round(gold24 * 0.916);
+    const gold18 = Math.round(gold24 * 0.75);
 
-    // Convert USD/oz → INR/g
-    const goldInrPerGram = (goldUsd * usdInr) / gram;
-    const silverInrPerGram = (silverUsd * usdInr) / gram;
-
-    // Premiums
-    const premiumGold = 150;
-    const premiumSilver = 2;
-
-    const gold24 = Math.round(goldInrPerGram + premiumGold);
-    const gold22 = Math.round(gold24 * (22 / 24));
-    const gold18 = Math.round(gold24 * (18 / 24));
-
-    const silver999 = Math.round(silverInrPerGram + premiumSilver);
+    const silver999 = Math.round(silverPerGramRaw + PREMIUM_SILVER_PER_GRAM);
 
     return res.json({
-      source: "gold-api.com",
+      source: "gold-api.com + frankfurter.dev",
       fetched_at: new Date().toISOString(),
-      goldUsdPerOz: goldUsd,
-      silverUsdPerOz: silverUsd,
+
       usdInr,
+
+      goldUsdPerOz,
+      silverUsdPerOz,
+
       gold: {
         sell24: gold24,
         sell22: gold22,
-        sell18: gold18
+        sell18: gold18,
+        perGramRawINR: Number(goldPerGramRaw.toFixed(2)),
       },
+
       silver: {
-        sell: silver999
+        sell: silver999,
+        perGramRawINR: Number(silverPerGramRaw.toFixed(2)),
       },
+
       products: [
         { name: "Gold 24K per gram", sell: gold24 },
         { name: "Gold 22K per gram", sell: gold22 },
         { name: "Gold 18K per gram", sell: gold18 },
-        { name: "Silver 999 per gram", sell: silver999 }
-      ]
+        { name: "Silver 999 per gram", sell: silver999 },
+      ],
     });
+
   } catch (err) {
-    console.error("Live API error:", err.message);
-    return res.status(500).json({ error: "Live API failed", details: err.message });
+    console.error("Live rate error:", err.message);
+    res.status(500).json({ error: "Live pricing failed" });
   }
 };
