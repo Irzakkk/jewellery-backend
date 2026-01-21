@@ -1,58 +1,36 @@
-const pool = require("../config/db");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import pool from "../db.js";
 
-// Register admin (we use manually once)
-exports.registerAdmin = async (req, res) => {
+export const adminLogin = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { username, password } = req.body;
-
-    if (!username || !password)
-      return res.status(400).json({ error: "Username and password required" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await pool.query(
-      "INSERT INTO admin_users (username, password, created_at) VALUES ($1, $2, NOW())",
-      [username, hashedPassword]
-    );
-
-    res.json({ message: "Admin registered successfully" });
-  } catch (error) {
-    console.error("Error registering admin:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-// Login admin
-exports.loginAdmin = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
     const result = await pool.query(
-      "SELECT * FROM admin_users WHERE username = $1",
-      [username]
+      "SELECT * FROM admins WHERE email=$1 LIMIT 1",
+      [email]
     );
 
-    if (result.rows.length === 0)
-      return res.status(400).json({ error: "Invalid username or password" });
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     const admin = result.rows[0];
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-
-    if (!isMatch)
-      return res.status(400).json({ error: "Invalid username or password" });
+    const match = await bcrypt.compare(password, admin.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     const token = jwt.sign(
-      { id: admin.id, username: admin.username },
+      { id: admin.id, email: admin.email },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "24h" }
     );
 
-    res.json({ message: "Login successful", token });
-  } catch (error) {
-    console.error("Error logging in admin:", error);
+    res.json({ token });
+  } catch (err) {
+    console.error("Admin login error:", err);
     res.status(500).json({ error: "Server error" });
   }
 };

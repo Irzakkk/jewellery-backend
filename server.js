@@ -59,3 +59,6 @@ app.use("/api/ticker", tickerRoutes);
 const unlimitedLiveRoutes = require("./src/routes/unlimitedLive");
 app.use("/api/live", unlimitedLiveRoutes);
 
+
+const mcxRoutes = require("./src/routes/mcx");
+app.use("/api/mcx", mcxRoutes);
