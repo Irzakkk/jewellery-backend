@@ -1,15 +1,16 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import pool from "../db.js";
+import pool from "../config/db.js";
 
 export const adminLogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const result = await pool.query(
-      "SELECT * FROM admins WHERE email=$1 LIMIT 1",
-      [email]
-    );
+  "SELECT * FROM admin_users WHERE username=$1 LIMIT 1",
+  [email]  
+);
+
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -17,7 +18,7 @@ export const adminLogin = async (req, res) => {
 
     const admin = result.rows[0];
 
-    const match = await bcrypt.compare(password, admin.password_hash);
+    const match = await bcrypt.compare(password, admin.password);
     if (!match) {
       return res.status(401).json({ error: "Invalid credentials" });
     }

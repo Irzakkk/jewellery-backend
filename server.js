@@ -40,7 +40,9 @@ const customMessageRoutes = require("./src/routes/customMessages");
 app.use("/api/custom", customMessageRoutes);
 
 const adminRoutes = require("./src/routes/admin");
-app.use("/api/admin", adminRoutes);
+console.log("ADMIN ROUTES:", adminRoutes)
+
+app.use('/admin', adminRoutes.default)
 
 const notificationRoutes = require("./src/routes/notifications");
 app.use("/api/notifications", notificationRoutes);
